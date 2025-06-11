@@ -6,7 +6,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "test": "vitest"
+    "build": "vite build",
+    "test": "vitest",
+    "lint": "eslint . --ext .js,.jsx",
+    "format:check": "prettier --check ."
   },
   "repository": {
     "type": "git",
