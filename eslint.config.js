@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 import prettier from 'eslint-config-prettier';
+import globals from 'globals';
 
 export default [
   {
@@ -20,6 +21,11 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: { jsx: true }
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021
       }
     }
   },
