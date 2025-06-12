@@ -51,19 +51,12 @@ function createDom(vnode) {
   const { type, props } = vnode;
   const dom = document.createElement(type);
 
-  // key 설정
+  // prop 설정 (className, 기타 속성 처리)
   for (const key in props) {
-    if (key !== 'children') {
+    if (key === 'className') {
+      dom.className = props[key];
+    } else if (key !== 'children' && key !== 'key') {
       dom.setAttribute(key, props[key]);
-    }
-  }
-
-  //prop 설정
-  for (const prop in vnode.props) {
-    if (prop === 'className') {
-      dom.className = vnode.props[prop];
-    } else {
-      dom.setAttribute(prop, vnode.props[prop]);
     }
   }
 
