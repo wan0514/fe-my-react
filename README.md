@@ -26,8 +26,7 @@ src/
 ├── components/        # 실습용 컴포넌트
 ├── pages/             # SPA 라우팅이 적용되는 페이지
 ├── app/               # 진입점 및 공통 설정
-│   ├── main.jsx
-│   └── vite.config.js
+│   └── main.jsx
 ├── __tests__/             # 테스트 파일
 └── ...
 ```
