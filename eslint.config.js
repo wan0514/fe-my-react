@@ -1,17 +1,25 @@
 import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 import prettier from 'eslint-config-prettier';
-import babelParser from '@babel/eslint-parser';
 
 export default [
   {
+    ignores: [
+      'dist/',
+      'node_modules/',
+      'coverage/',
+      '.vite/',
+      '.env',
+      'public/',
+      '*.config.js'
+    ]
+  },
+  {
     languageOptions: {
-      parser: babelParser,
       parserOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',
-        ecmaFeatures: { jsx: true },
-        requireConfigFile: false
+        ecmaFeatures: { jsx: true }
       }
     }
   },
