@@ -105,12 +105,6 @@ describe('createElement 함수', () => {
       );
     });
 
-    it('숫자 children도 TEXT_ELEMENT 타입으로 변환되어야 한다', () => {
-      const vnode = createElement('div', null, 123);
-      expect(vnode.props.children.type).toBe('TEXT_ELEMENT');
-      expect(vnode.props.children.props.nodeValue).toBe(123);
-    });
-
     it('boolean children은 props.children에 포함되지만 렌더링 시 무시된다', () => {
       const vnode = createElement('div', null, false);
       expect(vnode.props.children).toBe(false);

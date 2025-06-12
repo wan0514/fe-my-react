@@ -27,11 +27,11 @@ export function createElement(type, config, ...children) {
         : child
     );
 
+  // children이 없는 경우 props.children은 정의하지 않음
   if (normalizedChildren.length === 1) {
     props.children = normalizedChildren[0];
   } else if (normalizedChildren.length > 1) {
     props.children = normalizedChildren;
-  } else {
   }
 
   return { type, props };
