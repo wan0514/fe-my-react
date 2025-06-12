@@ -2,6 +2,12 @@ export function render(vnode, container) {
   //TODO diff알고리즘과 Virtual Dom 구현시 변경 예정
   container.innerHTML = '';
 
+  // 함수형 컴포넌트인 경우 실행하여 vnode를 반환받고 다시 렌더링
+  if (typeof vnode.type === 'function') {
+    const nextVNode = vnode.type(vnode.props);
+    return render(nextVNode, container);
+  }
+
   const dom = createDom(vnode);
   container.appendChild(dom);
 }
@@ -31,7 +37,6 @@ function createDom(vnode) {
       dom.setAttribute(prop, vnode.props[prop]);
     }
   }
-
   //children 배열로 표준화
   const children = Array.isArray(props.children)
     ? props.children
