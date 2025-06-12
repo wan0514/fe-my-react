@@ -1,28 +1,48 @@
 /**
  * createElement(type, config, ...children)
  *
- * JSX가 변환된 결과를 받아 Virtual DOM 객체(VNode)를 생성하는 함수.
- * React의 createElement와 동일한 인터페이스를 따르며, 내부에서는
- * config를 기반으로 props 객체를 구성하고 children을 props.children에 포함시킨다.
+ * JSX를 Virtual DOM(VNode) 객체로 변환하는 함수입니다.
+ * 이 함수는 구조를 정의하는 데 집중하며, 각 노드의 렌더링 여부는
+ * 렌더 단계에서 판단됩니다.
  *
- * - type: 문자열 태그명(e.g., 'div') 또는 함수형 컴포넌트
- * - config: JSX 속성 객체. 일반적으로 props에 해당하며, null일 수 있음
- * - children: 0개 이상 전달될 수 있으며, 다음 규칙에 따라 처리됨
- *    - 0개: props.children을 설정하지 않음
- *    - 1개: 단일 값으로 props.children에 저장
- *    - 2개 이상: 배열로 props.children에 저장
+ * - type: 태그 문자열(e.g. 'div') 또는 함수형 컴포넌트
+ * - config: JSX에서 전달된 props 객체 (null일 수 있음)
+ * - children: 0개 이상의 자식 요소로 다음과 같이 처리됩니다:
+ *    - 문자열(string)과 숫자(number)는 TEXT_ELEMENT로 래핑됩니다
+ *    - 그 외의 값(null, undefined, boolean 등)은 판단하지 않고 그대로 포함됩니다
+ *    - 유효한 children이 1개면 단일 값으로, 2개 이상이면 배열로 props.children에 저장됩니다
+ *    - children이 0개인 경우 props.children은 정의되지 않습니다
  *
- * React의 철학(선언형 UI, 직관적 데이터 흐름)을 반영하여,
- * JSX 구조와 VNode 구조가 자연스럽게 매핑되도록 설계됨
+ * 이 함수는 React의 선언형 철학을 반영하여 구조만 정의하고,
+ * 렌더링 판단은 별도로 수행되도록 설계되었습니다.
  */
 export function createElement(type, config, ...children) {
   const props = { ...config };
 
-  if (children.length === 1) {
-    props.children = children[0];
-  } else if (children.length > 1) {
-    props.children = children;
+  const normalizedChildren = children
+    .flat()
+    .map((child) =>
+      typeof child === 'string' || typeof child === 'number'
+        ? createTextElement(child)
+        : child
+    );
+
+  // children이 없는 경우 props.children은 정의하지 않음
+  if (normalizedChildren.length === 1) {
+    props.children = normalizedChildren[0];
+  } else if (normalizedChildren.length > 1) {
+    props.children = normalizedChildren;
   }
 
   return { type, props };
+}
+
+function createTextElement(text) {
+  return {
+    type: 'TEXT_ELEMENT',
+    props: {
+      nodeValue: text,
+      children: []
+    }
+  };
 }
