@@ -51,7 +51,8 @@ export default [
       react
     },
     rules: {
-      'react/react-in-jsx-scope': 'off'
+      'react/react-in-jsx-scope': 'off',
+      'react/jsx-uses-vars': 'error'
     }
   },
   prettier
