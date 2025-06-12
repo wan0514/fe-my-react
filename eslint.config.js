@@ -2,6 +2,7 @@ import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
+import vitest from 'eslint-plugin-vitest';
 
 export default [
   {
@@ -14,6 +15,21 @@ export default [
       'public/',
       '*.config.js'
     ]
+  },
+  {
+    files: ['**/*.test.js', '**/__tests__/**/*.js'],
+    plugins: {
+      vitest
+    },
+    rules: {
+      ...vitest.configs.recommended.rules,
+      'vitest/expect-expect': 'off'
+    },
+    languageOptions: {
+      globals: {
+        ...vitest.environments.env.globals
+      }
+    }
   },
   {
     languageOptions: {
