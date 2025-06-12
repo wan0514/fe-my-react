@@ -1,4 +1,4 @@
-import { createElement } from '../core/createElement';
+import '../setup/setupGlobals';
 import { render } from '../core/render';
 
 const element = (
