@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/wan0514/fe-my-react#readme",
   "devDependencies": {
+    "@rollup/plugin-inject": "^5.0.5",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
