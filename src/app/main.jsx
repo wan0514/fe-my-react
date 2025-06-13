@@ -1,4 +1,3 @@
-import '../setup/setupGlobals';
 import { render } from '../core/render';
 import App from './App';
 
