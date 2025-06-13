@@ -1,18 +1,17 @@
 /**
- * render(vnode, container)
- *
- * Virtual DOM(VNode)을 실제 DOM으로 변환하여 container에 마운트하는 함수입니다.
- * React의 렌더링 방식과 유사하게 동작하며, 구조는 그대로 따르고 의미 판단은 이 단계에서 수행합니다.
- *
- * - vnode: Virtual DOM 노드. 문자열 태그, 함수형 컴포넌트, TEXT_ELEMENT 등을 포함할 수 있습니다
- * - container: 렌더링 결과를 삽입할 실제 DOM 노드
+ * Virtual DOM(VNode)을 실제 DOM으로 변환하여 container에 마운트합니다.
+ * React의 렌더링 방식과 유사하게 동작하며, 함수형 컴포넌트도 처리합니다.
  *
  * 처리 방식:
  * - null, undefined, boolean과 같은 의미 없는 vnode는 렌더링하지 않고 무시됩니다
  * - 함수형 컴포넌트는 실행하여 실제 vnode로 변환한 뒤 재귀적으로 렌더링됩니다
  * - 일반 태그나 텍스트 vnode는 createDom을 통해 실제 DOM 노드로 변환되어 container에 추가됩니다
  *
- * 이 함수는 구조 + 의미까지 해석하여 실제 화면에 그려주는 단계입니다.
+ * @function
+ * @param {Object} vnode - Virtual DOM 객체 (문자열 태그, 함수형 컴포넌트, TEXT_ELEMENT 등)
+ * @param {HTMLElement} container - 렌더링 결과를 삽입할 실제 DOM 노드
+ * 이 함수는 별도 값을 반환하지 않습니다.
+ * @returns {void}
  */
 export function render(vnode, container) {
   //TODO diff알고리즘과 Virtual Dom 구현시 변경 예정
@@ -33,14 +32,17 @@ export function render(vnode, container) {
 }
 
 /**
- * createDom(vnode)
+ * Virtual DOM 노드를 실제 DOM 노드로 변환합니다.
  *
- * 주어진 Virtual DOM 노드(vnode)를 실제 DOM 노드로 변환하는 함수입니다.
- * - TEXT_ELEMENT인 경우 텍스트 노드를 생성합니다.
- * - 일반 태그인 경우 DOM 요소를 생성하고 props를 attribute로 설정합니다.
- * - children은 배열로 정규화하여 재귀적으로 처리하며, isRenderable로 필터링합니다.
+ * 처리 방식:
+ * - 함수형 컴포넌트는 실행 결과를 다시 vnode로 변환하여 재귀 처리됩니다.
+ * - TEXT_ELEMENT는 `document.createTextNode`로 생성됩니다.
+ * - 일반 태그는 `document.createElement`로 생성하고 props를 DOM 속성으로 설정합니다.
+ * - children은 배열로 표준화한 뒤, 각 항목을 재귀적으로 DOM으로 변환하여 자식으로 추가합니다.
  *
- * 반환된 DOM 노드는 상위 요소에 append되어 화면에 렌더링됩니다.
+ * @function
+ * @param {Object} vnode - 변환할 Virtual DOM 노드
+ * @returns {Node} 변환된 실제 DOM 노드
  */
 function createDom(vnode) {
   // 함수형 컴포넌트면 먼저 실행해서 vnode를 얻고 다시 처리
@@ -80,20 +82,30 @@ function createDom(vnode) {
 }
 
 /**
- * isRenderable(child)
+ * 주어진 child가 실제 DOM으로 렌더링 가능한 값인지 여부를 판단합니다.
  *
- * 해당 child가 실제 DOM으로 렌더링 가능한 값인지 여부를 판단합니다.
- * - null, undefined, boolean은 의미 없는 값으로 간주되어 false를 반환합니다.
- * - 나머지 값들은 true를 반환하여 렌더링 대상이 됩니다.
+ * 처리 방식:
+ * - null, undefined, boolean 값은 무시되며 렌더링되지 않습니다.
+ * - 숫자, 문자열, 객체 등은 렌더링 가능한 값으로 간주됩니다.
+ *
+ * @function
+ * @param {*} child - 검사할 값
+ * @returns {boolean} 렌더링 가능한 값이면 true, 그렇지 않으면 false
  */
 function isRenderable(child) {
   return !(child === null || child === undefined || typeof child === 'boolean');
 }
 
 /**
- * evaluateFunctionComponent(vnode)
+ * 함수형 컴포넌트를 실제 vnode로 평가합니다.
  *
- * 함수형 컴포넌트 vnode를 실제 vnode로 변환합니다.
+ * 처리 방식:
+ * - vnode.type이 함수일 경우, 해당 함수를 실행하여 반환된 vnode를 반환합니다.
+ * - 이 vnode는 다시 createDom 또는 render 함수에 의해 처리됩니다.
+ *
+ * @function
+ * @param {Object} vnode - type이 함수인 Virtual DOM 노드
+ * @returns {Object} 평가된 Virtual DOM 노드
  */
 function evaluateFunctionComponent(vnode) {
   return vnode.type(vnode.props);
