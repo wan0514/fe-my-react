@@ -25,8 +25,7 @@ export function render(vnode, container) {
 
   // 함수형 컴포넌트인 경우 실행하여 vnode를 반환받고 다시 렌더링
   if (typeof vnode.type === 'function') {
-    const nextVNode = vnode.type(vnode.props);
-    return render(nextVNode, container);
+    return render(evaluateFunctionComponent(vnode), container);
   }
 
   const dom = createDom(vnode);
@@ -46,8 +45,7 @@ export function render(vnode, container) {
 function createDom(vnode) {
   // 함수형 컴포넌트면 먼저 실행해서 vnode를 얻고 다시 처리
   if (typeof vnode.type === 'function') {
-    const nextVNode = vnode.type(vnode.props);
-    return createDom(nextVNode);
+    return createDom(evaluateFunctionComponent(vnode));
   }
 
   // TEXT_ELMENT 처리
@@ -90,4 +88,13 @@ function createDom(vnode) {
  */
 function isRenderable(child) {
   return !(child === null || child === undefined || typeof child === 'boolean');
+}
+
+/**
+ * evaluateFunctionComponent(vnode)
+ *
+ * 함수형 컴포넌트 vnode를 실제 vnode로 변환합니다.
+ */
+function evaluateFunctionComponent(vnode) {
+  return vnode.type(vnode.props);
 }
