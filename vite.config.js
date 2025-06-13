@@ -1,11 +1,12 @@
 import { defineConfig } from 'vite';
+import path from 'path';
 import autoImportPlugin from './plugins/autoImportPlugin.js';
 
 export default defineConfig({
   plugins: [
     autoImportPlugin({
       identifier: 'createElement',
-      from: 'src/core/createElement'
+      from: path.resolve('src/core/createElement')
     })
   ],
   esbuild: {
