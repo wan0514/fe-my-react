@@ -42,4 +42,32 @@ describe('render', () => {
     expect(container.innerHTML).not.toContain('Old');
     expect(container.textContent).toBe('New');
   });
+
+  it('함수형 컴포넌트를 렌더링해야 합니다.', () => {
+    const Sample = () => createElement('p', null, 'Sample Text');
+    const vnode = createElement(Sample, null);
+    render(vnode, container);
+
+    const p = container.querySelector('p');
+    expect(p).toBeTruthy();
+    expect(p.textContent).toBe('Sample Text');
+  });
+
+  it('중첩된 함수형 컴포넌트를 렌더링해야 합니다.', () => {
+    const Inner = () => createElement('span', null, 'Inner');
+    const Middle = () => createElement('div', null, createElement(Inner));
+    const Outer = () => createElement('section', null, createElement(Middle));
+
+    const vnode = createElement(Outer, null);
+    render(vnode, container);
+
+    const section = container.querySelector('section');
+    const div = container.querySelector('div');
+    const span = container.querySelector('span');
+
+    expect(section).toBeTruthy();
+    expect(div).toBeTruthy();
+    expect(span).toBeTruthy();
+    expect(span.textContent).toBe('Inner');
+  });
 });
