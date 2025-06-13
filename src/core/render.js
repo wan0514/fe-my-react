@@ -44,6 +44,13 @@ export function render(vnode, container) {
  * 반환된 DOM 노드는 상위 요소에 append되어 화면에 렌더링됩니다.
  */
 function createDom(vnode) {
+  // 함수형 컴포넌트면 먼저 실행해서 vnode를 얻고 다시 처리
+  if (typeof vnode.type === 'function') {
+    const nextVNode = vnode.type(vnode.props);
+    return createDom(nextVNode);
+  }
+
+  // TEXT_ELMENT 처리
   if (vnode.type === 'TEXT_ELEMENT') {
     return document.createTextNode(vnode.props.nodeValue);
   }
