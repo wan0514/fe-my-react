@@ -1,3 +1,5 @@
+import Sample from './Sample';
+
 export default function App({ name }) {
   return (
     <div className="container">
@@ -10,6 +12,7 @@ export default function App({ name }) {
           <li key="3">Applies basic props like className</li>
         </ul>
       </section>
+      <Sample />
     </div>
   );
 }
