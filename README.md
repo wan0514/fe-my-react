@@ -15,10 +15,11 @@ JSX 파싱부터 컴포넌트 시스템, 상태 관리, 이벤트 위임, 가상
 - Vitest를 이용한 테스트 프레임워크
 - ESLint Flat Config, Prettier를 통한 코드 스타일 통일
 
-## 디렉토리 구조 (예정)
+## 디렉토리 구조
 
 ```
 src/
+├── plugins/           # Plugin 구현
 ├── core/              # React 핵심 기능 직접 구현
 │   ├── createElement.js
 │   ├── render.js
@@ -38,10 +39,6 @@ src/
 읽어보세요:  
 [프로젝트 문서 보기](https://github.com/wan0514/fe-my-react/wiki)
 
-주요 문서
-
-- 작성 예정
-
 ## 프로젝트 관리
 
 이 프로젝트는 GitHub Projects를 활용해 Task와 일정을 관리하고 있습니다.  
@@ -53,9 +50,9 @@ src/
 
 - [x] 개발 환경 구성 (Vite, Babel, ESLint, Prettier, Vitest)
 - [x] JSX → createElement 트랜스파일러 연동
-- [ ] 컴포넌트 시스템 구현
-- [ ] 상태 관리 및 리렌더링 시스템 구축
+- [x] 컴포넌트 시스템 구현
 - [ ] 이벤트 위임 방식 도입
+- [ ] 상태 관리 및 리렌더링 시스템 구축
 - [ ] (선택) 가상 DOM 및 diff 알고리즘
 - [ ] (선택) SPA 라우터
 - [ ] Todo App 완성
