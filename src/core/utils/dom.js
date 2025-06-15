@@ -1,24 +1,4 @@
-const eventNameMap = Object.freeze({
-  click: 'click',
-  doubleclick: 'dblclick',
-  mousedown: 'mousedown',
-  mouseup: 'mouseup',
-  mouseenter: 'mouseenter',
-  mouseleave: 'mouseleave',
-  keydown: 'keydown',
-  keyup: 'keyup',
-  input: 'input',
-  change: 'change',
-  submit: 'submit',
-  focus: 'focus',
-  blur: 'blur',
-  contextmenu: 'contextmenu',
-  pointerdown: 'pointerdown',
-  pointerup: 'pointerup',
-  dragstart: 'dragstart',
-  dragend: 'dragend'
-});
-
+import { eventMap } from '../event';
 /**
  * 주어진 키가 유효한 DOM 이벤트 핸들러 이름인지 확인합니다.
  *
@@ -31,8 +11,5 @@ const eventNameMap = Object.freeze({
 export function isEventHandler(key) {
   if (!key.startsWith('on')) return false;
 
-  const camelEvent = key.slice(2).toLowerCase();
-  const domEvent = eventNameMap[camelEvent];
-
-  return !!domEvent;
+  return Object.values(eventMap).includes(key);
 }
