@@ -1,4 +1,5 @@
 import { isEventHandler } from './utils/dom';
+import { initEventDelegation } from './event';
 
 /**
  * Virtual DOM(VNode)을 실제 DOM으로 변환하여 container에 마운트합니다.
@@ -31,6 +32,9 @@ export function render(vnode, container) {
 
   const dom = createDom(vnode);
   container.appendChild(dom);
+
+  //이벤트 위임
+  initEventDelegation(container);
 }
 
 /**
