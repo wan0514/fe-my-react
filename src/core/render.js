@@ -1,3 +1,6 @@
+import { isEventHandler } from './utils/dom';
+import { initEventDelegation } from './event';
+
 /**
  * Virtual DOM(VNode)을 실제 DOM으로 변환하여 container에 마운트합니다.
  * React의 렌더링 방식과 유사하게 동작하며, 함수형 컴포넌트도 처리합니다.
@@ -29,6 +32,9 @@ export function render(vnode, container) {
 
   const dom = createDom(vnode);
   container.appendChild(dom);
+
+  //이벤트 위임
+  initEventDelegation(container);
 }
 
 /**
@@ -60,10 +66,16 @@ function createDom(vnode) {
 
   // prop 설정 (className, 기타 속성 처리)
   for (const key in props) {
+    const value = props[key];
+
+    if (isEventHandler(key)) {
+      continue; // 이벤트 핸들러는 DOM 속성에 추가하지 않음
+    }
+
     if (key === 'className') {
-      dom.className = props[key];
-    } else if (key !== 'children' && key !== 'key') {
-      dom.setAttribute(key, props[key]);
+      dom.className = value;
+    } else if (key !== 'children') {
+      dom.setAttribute(key, value);
     }
   }
 
@@ -71,6 +83,9 @@ function createDom(vnode) {
   const children = Array.isArray(props.children)
     ? props.children
     : [props.children];
+
+  //_vnode 속성 추가
+  dom.__vnode = vnode;
 
   //재귀적으로 자식 랜더링
   children.filter(isRenderable).forEach((child) => {
