@@ -106,4 +106,43 @@ describe('event delegation', () => {
 
     expect(handleLeave).toHaveBeenCalledTimes(1);
   });
+
+  test('stopPropagation 호출 시 상위 핸들러 실행되지 않음', () => {
+    const parent = document.createElement('div');
+    const child = document.createElement('button');
+
+    const parentHandler = vi.fn();
+    const childHandler = (e) => {
+      e.stopPropagation();
+    };
+
+    parent.__vnode = { props: { onClick: parentHandler } };
+    child.__vnode = { props: { onClick: childHandler } };
+
+    parent.appendChild(child);
+    root.appendChild(parent);
+
+    child.click();
+
+    expect(parentHandler).not.toHaveBeenCalled();
+  });
+
+  test('stopPropagation 호출하지 않으면 상위 핸들러까지 실행됨', () => {
+    const parent = document.createElement('div');
+    const child = document.createElement('button');
+
+    const parentHandler = vi.fn();
+    const childHandler = vi.fn();
+
+    parent.__vnode = { props: { onClick: parentHandler } };
+    child.__vnode = { props: { onClick: childHandler } };
+
+    parent.appendChild(child);
+    root.appendChild(parent);
+
+    child.click();
+
+    expect(childHandler).toHaveBeenCalled();
+    expect(parentHandler).toHaveBeenCalled();
+  });
 });

@@ -37,15 +37,33 @@ function handleDelegatedEvent(event, root) {
   const propKey = eventMap[eventType];
   if (!propKey) return;
 
+  const syntheticEvent = createSyntheticEvent(event);
+
   let node = event.target;
 
   while (node && node !== root) {
     const vnode = node.__vnode;
     const handler = vnode?.props?.[propKey];
     if (typeof handler === 'function') {
-      handler(event);
-      break;
+      handler(syntheticEvent);
     }
+
+    if (syntheticEvent.__stopped) break;
+
     node = node.parentNode;
   }
+}
+
+function createSyntheticEvent(nativeEvent) {
+  nativeEvent.__stopped = false;
+
+  const originalStop = nativeEvent.stopPropagation;
+  nativeEvent.stopPropagation = function () {
+    nativeEvent.__stopped = true;
+    if (typeof originalStop === 'function') {
+      originalStop.call(nativeEvent);
+    }
+  };
+
+  return nativeEvent;
 }
