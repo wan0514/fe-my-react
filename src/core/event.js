@@ -39,7 +39,7 @@ function handleDelegatedEvent(event, root) {
 
   let node = event.target;
 
-  while (node && node !== root.parentNode) {
+  while (node && node !== root) {
     const vnode = node.__vnode;
     const handler = vnode?.props?.[propKey];
     if (typeof handler === 'function') {
