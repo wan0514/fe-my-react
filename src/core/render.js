@@ -29,7 +29,15 @@ export function render(vnode, container) {
 
   // 함수형 컴포넌트인 경우 실행하여 vnode를 반환받고 다시 렌더링
   if (typeof vnode.type === 'function') {
-    return render(evaluateFunctionComponent(vnode), container);
+    const evaluatedVNode = evaluateFunctionComponent(vnode);
+    const dom = createDom(evaluatedVNode);
+
+    //함수형 vnode(AppVNode)에 __dom 설정
+    vnode.__dom = dom;
+
+    container.appendChild(dom);
+    initEventDelegation(container);
+    return;
   }
 
   const dom = createDom(vnode);
@@ -55,7 +63,10 @@ export function render(vnode, container) {
 function createDom(vnode) {
   // 함수형 컴포넌트면 먼저 실행해서 vnode를 얻고 다시 처리
   if (typeof vnode.type === 'function') {
-    return createDom(evaluateFunctionComponent(vnode));
+    const evaluatedVNode = evaluateFunctionComponent(vnode);
+    const dom = createDom(evaluatedVNode);
+    vnode.__dom = dom;
+    return dom;
   }
 
   // TEXT_ELMENT 처리
@@ -132,7 +143,19 @@ function evaluateFunctionComponent(vnode) {
   let state = getComponentState(vnode.type);
 
   if (!state) {
-    state = { hookIndex: 0, stateBucket: [] };
+    state = {
+      hookIndex: 0,
+      stateBucket: [],
+      rerender: () => {
+        state.hookIndex = 0;
+        setCurrentState(state);
+        const newVNode = vnode.type(vnode.props);
+        const newDom = createDom(newVNode);
+
+        vnode.__dom.replaceWith(newDom);
+        vnode.__dom = newDom;
+      }
+    };
     setComponentState(vnode.type, state);
   }
 
@@ -140,5 +163,6 @@ function evaluateFunctionComponent(vnode) {
   state.hookIndex = 0;
   setCurrentState(state);
 
-  return vnode.type(vnode.props);
+  const childVNode = vnode.type(vnode.props);
+  return childVNode;
 }

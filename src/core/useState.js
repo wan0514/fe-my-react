@@ -17,9 +17,7 @@ export function useState(initialValue) {
     stateBucket[currentIndex] =
       typeof nextValue === 'function' ? nextValue(prev) : nextValue;
 
-    console.log('rerender!!');
-
-    //render 호출
+    state.rerender();
   }
 
   state.hookIndex++;
