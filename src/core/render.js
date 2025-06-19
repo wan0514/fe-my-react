@@ -1,4 +1,6 @@
 import { isEventHandler } from './utils/dom';
+import { setCurrentState } from './context';
+import { getComponentState, setComponentState } from './componentState';
 import { initEventDelegation } from './event';
 
 /**
@@ -112,16 +114,31 @@ function isRenderable(child) {
 }
 
 /**
- * 함수형 컴포넌트를 실제 vnode로 평가합니다.
+ * 함수형 컴포넌트를 실행하여 실제 Virtual DOM 노드(vnode)를 평가합니다.
  *
  * 처리 방식:
- * - vnode.type이 함수일 경우, 해당 함수를 실행하여 반환된 vnode를 반환합니다.
- * - 이 vnode는 다시 createDom 또는 render 함수에 의해 처리됩니다.
+ * - vnode.type이 함수인 경우, 해당 함수를 실행하여 반환된 vnode를 리턴합니다.
+ * - 각 함수형 컴포넌트는 componentMap에 고유한 상태 저장소(state)를 가집니다.
+ *   - 상태 저장소가 없으면 새로 생성하고, 있으면 기존 값을 재사용합니다.
+ * - 컴포넌트가 렌더링되는 시점에 해당 상태를 현재 렌더링 컨텍스트(__CURRENT_STATE)에 설정합니다.
+ *   - useState 훅은 이 설정된 상태를 참조하여 작동합니다.
+ * - 반환된 vnode는 이후 createDom 또는 render 함수에서 처리되어 실제 DOM으로 변환됩니다.
  *
  * @function
  * @param {Object} vnode - type이 함수인 Virtual DOM 노드
  * @returns {Object} 평가된 Virtual DOM 노드
  */
 function evaluateFunctionComponent(vnode) {
+  let state = getComponentState(vnode.type);
+
+  if (!state) {
+    state = { hookIndex: 0, stateBucket: [] };
+    setComponentState(vnode.type, state);
+  }
+
+  // 랜더링일 일어날 때 마다 hookIndex 초기화
+  state.hookIndex = 0;
+  setCurrentState(state);
+
   return vnode.type(vnode.props);
 }
