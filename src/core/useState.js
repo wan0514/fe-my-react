@@ -13,10 +13,11 @@ export function useState(initialValue) {
 
   function setState(nextValue) {
     const prev = stateBucket[currentIndex];
-
-    stateBucket[currentIndex] =
-      typeof nextValue === 'function' ? nextValue(prev) : nextValue;
-
+    const next = typeof nextValue === 'function' ? nextValue(prev) : nextValue;
+    if (Object.is(prev, next)) {
+      return; // 값이 동일하면 리렌더링 방지
+    }
+    stateBucket[currentIndex] = next;
     state.rerender();
   }
 
