@@ -29,7 +29,7 @@ export function render(vnode, container) {
 
   // 함수형 컴포넌트인 경우 실행하여 vnode를 반환받고 다시 렌더링
   if (typeof vnode.type === 'function') {
-    const evaluatedVNode = evaluateFunctionComponent(vnode);
+    const evaluatedVNode = renderFunctionComponent(vnode);
     const dom = createDom(evaluatedVNode);
 
     //함수형 vnode(AppVNode)에 __dom 설정
@@ -63,7 +63,7 @@ export function render(vnode, container) {
 function createDom(vnode) {
   // 함수형 컴포넌트면 먼저 실행해서 vnode를 얻고 다시 처리
   if (typeof vnode.type === 'function') {
-    const evaluatedVNode = evaluateFunctionComponent(vnode);
+    const evaluatedVNode = renderFunctionComponent(vnode);
     const dom = createDom(evaluatedVNode);
     vnode.__dom = dom;
     return dom;
@@ -139,30 +139,55 @@ function isRenderable(child) {
  * @param {Object} vnode - type이 함수인 Virtual DOM 노드
  * @returns {Object} 평가된 Virtual DOM 노드
  */
-function evaluateFunctionComponent(vnode) {
+function renderFunctionComponent(vnode) {
   let state = getComponentState(vnode.type);
-
   if (!state) {
-    state = {
-      hookIndex: 0,
-      stateBucket: [],
-      rerender: () => {
-        state.hookIndex = 0;
-        setCurrentState(state);
-        const newVNode = vnode.type(vnode.props);
-        const newDom = createDom(newVNode);
-
-        vnode.__dom.replaceWith(newDom);
-        vnode.__dom = newDom;
-      }
-    };
-    setComponentState(vnode.type, state);
+    state = initComponentInstance(vnode);
   }
+  prepareHookContext(state);
+  return vnode.type(vnode.props);
+}
 
-  // 랜더링일 일어날 때 마다 hookIndex 초기화
+/**
+ * 훅 컨텍스트를 준비하고 hookIndex를 초기화하며, 현재 상태를 설정합니다.
+ *
+ * @param {Object} state - 컴포넌트 인스턴스 상태 객체
+ */
+function prepareHookContext(state) {
   state.hookIndex = 0;
   setCurrentState(state);
+}
 
-  const childVNode = vnode.type(vnode.props);
-  return childVNode;
+/**
+ * 컴포넌트 인스턴스의 상태를 초기화하고, 재렌더링 콜백을 생성합니다.
+ *
+ * @param {Object} vnode - 함수형 컴포넌트의 Virtual DOM 노드
+ * @returns {Object} 초기화된 컴포넌트 상태 객체
+ */
+function initComponentInstance(vnode) {
+  const state = {
+    hookIndex: 0,
+    stateBucket: [],
+    rerender: null
+  };
+  state.rerender = createRerenderCallback(vnode, state);
+  setComponentState(vnode.type, state);
+  return state;
+}
+
+/**
+ * 컴포넌트를 다시 호출하여 새로운 VNode를 생성하고, 기존 DOM을 교체하는 재렌더링 콜백을 생성합니다.
+ *
+ * @param {Object} vnode - 기존 Virtual DOM 노드
+ * @param {Object} state - 컴포넌트 인스턴스 상태 객체
+ * @returns {Function} 재렌더링을 수행하는 콜백 함수
+ */
+function createRerenderCallback(vnode, state) {
+  return () => {
+    prepareHookContext(state);
+    const nextVNode = vnode.type(vnode.props);
+    const nextDom = createDom(nextVNode);
+    vnode.__dom.replaceWith(nextDom);
+    vnode.__dom = nextDom;
+  };
 }
