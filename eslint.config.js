@@ -17,7 +17,14 @@ export default [
     ]
   },
   {
-    files: ['**/*.test.js', '**/__tests__/**/*.js'],
+    files: [
+      '**/*.test.js',
+      '**/__tests__/**/*.js',
+      '**/*.test.jsx',
+      '**/__tests__/**/*.jsx',
+      '**/*.test.jsx',
+      '**/__tests__/**/*.jsx'
+    ],
     plugins: {
       vitest
     },
