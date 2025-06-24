@@ -3,6 +3,27 @@ import { setCurrentState } from './context';
 import { getComponentState, setComponentState } from './componentState';
 import { initEventDelegation } from './event';
 
+let rootComponent;
+let rootContainer;
+
+/**
+ * 애플리케이션 전체를 처음 렌더링합니다.
+ */
+export function renderRoot(vnode, container) {
+  rootComponent = vnode;
+  rootContainer = container;
+  render(vnode, container);
+}
+
+/**
+ * 상태 변경 시 전체 애플리케이션을 재렌더링합니다.
+ */
+export function reRender() {
+  if (!rootComponent || !rootContainer) return;
+  rootContainer.innerHTML = '';
+  render(rootComponent, rootContainer);
+}
+
 /**
  * Virtual DOM(VNode)을 실제 DOM으로 변환하여 container에 마운트합니다.
  * React의 렌더링 방식과 유사하게 동작하며, 함수형 컴포넌트도 처리합니다.
@@ -31,9 +52,6 @@ export function render(vnode, container) {
   if (typeof vnode.type === 'function') {
     const evaluatedVNode = renderFunctionComponent(vnode);
     const dom = createDom(evaluatedVNode);
-
-    //함수형 vnode(AppVNode)에 __dom 설정
-    vnode.__dom = dom;
 
     container.appendChild(dom);
     initEventDelegation(container);
@@ -65,7 +83,6 @@ function createDom(vnode) {
   if (typeof vnode.type === 'function') {
     const evaluatedVNode = renderFunctionComponent(vnode);
     const dom = createDom(evaluatedVNode);
-    vnode.__dom = dom;
     return dom;
   }
 
@@ -159,7 +176,7 @@ function prepareHookContext(state) {
 }
 
 /**
- * 컴포넌트 인스턴스의 상태를 초기화하고, 재렌더링 콜백을 생성합니다.
+ * 컴포넌트 인스턴스의 상태를 초기화합니다.
  *
  * @param {Object} vnode - 함수형 컴포넌트의 Virtual DOM 노드
  * @returns {Object} 초기화된 컴포넌트 상태 객체
@@ -167,27 +184,9 @@ function prepareHookContext(state) {
 function initComponentInstance(vnode) {
   const state = {
     hookIndex: 0,
-    stateBucket: [],
-    rerender: null
+    stateBucket: []
   };
-  state.rerender = createRerenderCallback(vnode, state);
+
   setComponentState(vnode.type, state);
   return state;
-}
-
-/**
- * 컴포넌트를 다시 호출하여 새로운 VNode를 생성하고, 기존 DOM을 교체하는 재렌더링 콜백을 생성합니다.
- *
- * @param {Object} vnode - 기존 Virtual DOM 노드
- * @param {Object} state - 컴포넌트 인스턴스 상태 객체
- * @returns {Function} 재렌더링을 수행하는 콜백 함수
- */
-function createRerenderCallback(vnode, state) {
-  return () => {
-    prepareHookContext(state);
-    const nextVNode = vnode.type(vnode.props);
-    const nextDom = createDom(nextVNode);
-    vnode.__dom.replaceWith(nextDom);
-    vnode.__dom = nextDom;
-  };
 }
