@@ -3,4 +3,4 @@ import App from './App';
 
 const root = document.getElementById('root');
 
-render(<App name="wanja" />, root);
+render(<App />, root);
