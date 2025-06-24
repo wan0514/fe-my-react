@@ -1,6 +1,6 @@
-import { render } from '../core/render';
+import { renderRoot } from '../core/render';
 import App from './App';
 
 const root = document.getElementById('root');
 
-render(<App name="wanja" />, root);
+renderRoot(<App />, root);

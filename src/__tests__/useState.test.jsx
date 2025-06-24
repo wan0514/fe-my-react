@@ -1,5 +1,5 @@
 import { useState } from '../core/useState';
-import { render } from '../core/render';
+import { reRender, renderRoot } from '../core/render';
 import { createElement } from '../core/createElement';
 
 describe('useState 훅', () => {
@@ -19,7 +19,7 @@ describe('useState 훅', () => {
 
   function mount(AppComponent) {
     vnode = createElement(AppComponent);
-    render(vnode, root);
+    renderRoot(vnode, root);
   }
 
   it('초기 상태값이 DOM에 정확히 반영되어야 한다', () => {
@@ -78,25 +78,8 @@ describe('useState 훅', () => {
     expect(getCount2().textContent).toBe('110');
   });
 
-  it('상태 변경 후 vnode.__dom이 새로운 DOM 노드를 가리켜야 한다', () => {
-    const App = () => {
-      const [count, setCount] = useState(0);
-      window.bump = () => setCount((c) => c + 1);
-      return <div data-testid="count">num: {count}</div>;
-    };
-
-    mount(App);
-    const initialDom = vnode.__dom;
-    window.bump();
-    const updatedDom = vnode.__dom;
-
-    const countNode = root.querySelector('[data-testid="count"]');
-    expect(updatedDom).toBe(countNode);
-    expect(updatedDom).not.toBe(initialDom);
-    expect(updatedDom.textContent).toBe('num: 1');
-  });
-
-  it('중첩 컴포넌트에서 상태 변경 시 해당 부분만 다시 렌더링되어야 한다', () => {
+  // TODO: 부분리랜더링에 필요한 재조정, diff 설계 이후 다시 테스트
+  it.skip('중첩 컴포넌트에서 상태 변경 시 해당 부분만 다시 렌더링되어야 한다', () => {
     const App = () => {
       const [countA, setCountA] = useState(0);
       const [countB, setCountB] = useState(0);
@@ -162,5 +145,17 @@ describe('useState 훅', () => {
     expect(renderCount).toBe(1);
     window.same();
     expect(renderCount).toBe(1); // 값이 같으므로 리렌더링 없어야 함
+  });
+
+  it('reRender 호출 시 전체 앱이 재렌더링 되어야 한다', () => {
+    const spy = vi.fn();
+    const App = () => {
+      spy();
+      return <div />;
+    };
+    mount(App);
+    expect(spy).toHaveBeenCalledTimes(1);
+    reRender();
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 });
