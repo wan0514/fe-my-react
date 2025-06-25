@@ -51,7 +51,7 @@ src/
 - [x] 개발 환경 구성 (Vite, Babel, ESLint, Prettier, Vitest)
 - [x] JSX → createElement 트랜스파일러 연동
 - [x] 컴포넌트 시스템 구현
-- [ ] 이벤트 위임 방식 도입
+- [x] 이벤트 위임 방식 도입
 - [ ] 상태 관리 및 리렌더링 시스템 구축
 - [ ] (선택) 가상 DOM 및 diff 알고리즘
 - [ ] (선택) SPA 라우터
