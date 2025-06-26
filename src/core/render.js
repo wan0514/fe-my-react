@@ -2,6 +2,7 @@ import { isEventHandler } from './utils/dom';
 import { setCurrentState } from './context';
 import { getComponentState, setComponentState } from './componentState';
 import { initEventDelegation } from './event';
+import { patch } from './patch';
 
 /**
  * Virtual DOM(VNode)을 실제 DOM으로 변환하여 container에 마운트합니다.
@@ -61,7 +62,7 @@ export function render(vnode, container) {
  * @param {Object} vnode - 변환할 Virtual DOM 노드
  * @returns {Node} 변환된 실제 DOM 노드
  */
-function createDom(vnode) {
+export function createDom(vnode) {
   // 함수형 컴포넌트면 먼저 실행해서 vnode를 얻고 다시 처리
   if (typeof vnode.type === 'function') {
     const instanceKey = vnode.props.key != null ? vnode.props.key : vnode.type;
@@ -75,7 +76,9 @@ function createDom(vnode) {
 
   // TEXT_ELEMENT 처리
   if (vnode.type === 'TEXT_ELEMENT') {
-    return document.createTextNode(vnode.props.nodeValue);
+    const dom = document.createTextNode(vnode.props.nodeValue);
+    dom.__vnode = vnode;
+    return dom;
   }
 
   const { type, props } = vnode;
@@ -194,9 +197,16 @@ function createRerenderCallback(state) {
   return () => {
     prepareHookContext(state);
     const nextVNode = state.componentType(state.props);
-    const nextDom = createDom(nextVNode);
+    // const nextDom = createDom(nextVNode);
     const oldDom = state.dom; // 이전 루트 DOM
-    oldDom.replaceWith(nextDom); // 안전하게 교체
-    state.dom = nextDom; // 상태에 갱신
+
+    // patch 호출: oldDom의 __vnode를 prevVNode로 사용
+    const newDom = patch(oldDom, nextVNode);
+
+    // 상태에 새 DOM 저장
+    state.dom = newDom;
+
+    // oldDom.replaceWith(nextDom); // 안전하게 교체
+    // state.dom = nextDom; // 상태에 갱신
   };
 }
