@@ -1,5 +1,4 @@
 import { createDom } from './render';
-// src/core/render.js
 
 /**
  * 이전에 붙여둔 dom.__vnode와 nextVNode를 비교·패치합니다.
@@ -20,7 +19,7 @@ export function patch(dom, nextVNode) {
   }
 
   if (nextVNode.type === 'TEXT_ELEMENT') {
-    const prevText = dom.__vnode.props.nodeValue; // 이전 텍스트
+    const prevText = dom.__vnode.props.nodeValue;
     const nextText = nextVNode.props.nodeValue;
     if (prevText !== nextText) {
       dom.nodeValue = nextText;
@@ -63,32 +62,49 @@ export function patch(dom, nextVNode) {
     }
   }
 
-  // 4) children diff & patch (인덱스 기반 단순 매칭)
-  const prevChildren = Array.isArray(prevProps.children)
-    ? prevProps.children
-    : [prevProps.children];
-  const nextChildren = Array.isArray(nextProps.children)
-    ? nextProps.children
-    : [nextProps.children];
+  // 4) children diff & patch (key 기반 매칭)
 
-  const maxLen = Math.max(prevChildren.length, nextChildren.length);
-  for (let i = 0; i < maxLen; i++) {
-    const oldChildDom = dom.childNodes[i];
-    const prevC = prevChildren[i];
-    const nextC = nextChildren[i];
+  // prev/next children VNode 배열에서 null/false 제거
+  const prevChildren = (
+    Array.isArray(dom.__vnode.props.children)
+      ? dom.__vnode.props.children
+      : [dom.__vnode.props.children]
+  ).filter((c) => c != null && c !== false);
 
-    if (prevC != null && nextC != null) {
-      // 양쪽 모두 있을 땐 재귀 패치
-      patch(oldChildDom, nextC);
-    } else if (nextC != null) {
-      // 새로 추가된 자식
-      dom.appendChild(createDom(nextC));
-    } else if (prevC != null) {
-      // 제거된 자식
-      dom.removeChild(oldChildDom);
-      i--; // 인덱스 보정
+  const nextChildren = (
+    Array.isArray(nextProps.children)
+      ? nextProps.children
+      : [nextProps.children]
+  ).filter((c) => c != null && c !== false);
+
+  // 기존 DOM 노드들을 key 또는 인덱스를 키로 하는 맵으로 준비
+  const existingMap = new Map();
+  dom.childNodes.forEach((childDom, idx) => {
+    const prevVNodeChild = prevChildren[idx];
+    const key =
+      prevVNodeChild && prevVNodeChild.props.key != null
+        ? prevVNodeChild.props.key
+        : idx;
+    existingMap.set(key, childDom);
+  });
+
+  // nextChildren 순서로 패치 및 신규 엘리먼트 추가
+  nextChildren.forEach((childVNode, idx) => {
+    const key = childVNode.props.key != null ? childVNode.props.key : idx;
+    const matchedDom = existingMap.get(key);
+    if (matchedDom) {
+      patch(matchedDom, childVNode);
+      existingMap.delete(key);
+    } else {
+      const newDom = createDom(childVNode);
+      dom.appendChild(newDom);
     }
-  }
+  });
+
+  // 새 자식들에 포함되지 않은 기존 DOM은 모두 제거
+  existingMap.forEach((childDom) => {
+    dom.removeChild(childDom);
+  });
 
   // 5) __vnode 업데이트
   dom.__vnode = nextVNode;
