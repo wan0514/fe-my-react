@@ -1,15 +1,17 @@
 import Sample from './Sample';
-import { useState } from '../core/useState';
 
-export default function App() {
-  const [count, setCount] = useState(0);
-
+export default function App({ name }) {
   return (
     <div className="container">
-      <button onClick={() => setCount((prev) => prev + 1)}>
-        부모버튼 : {count}
-      </button>
-
+      <h1 className="title">Welcome to My App, {name}</h1>
+      <section className="intro">
+        <p>Hello, this is a simple custom renderer demo.</p>
+        <ul>
+          <li key="1">Supports JSX</li>
+          <li key="2">Handles nested elements</li>
+          <li key="3">Applies basic props like className</li>
+        </ul>
+      </section>
       <Sample />
     </div>
   );
