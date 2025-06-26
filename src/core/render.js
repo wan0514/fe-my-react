@@ -181,6 +181,7 @@ function initComponentInstance(vnode, instanceKey) {
     dom: null,
     rerender: null
   };
+
   state.instanceKey = instanceKey;
   state.rerender = createRerenderCallback(state);
   setComponentState(instanceKey, state);
@@ -197,7 +198,6 @@ function createRerenderCallback(state) {
   return () => {
     prepareHookContext(state);
     const nextVNode = state.componentType(state.props);
-    // const nextDom = createDom(nextVNode);
     const oldDom = state.dom; // 이전 루트 DOM
 
     // patch 호출: oldDom의 __vnode를 prevVNode로 사용
@@ -205,8 +205,5 @@ function createRerenderCallback(state) {
 
     // 상태에 새 DOM 저장
     state.dom = newDom;
-
-    // oldDom.replaceWith(nextDom); // 안전하게 교체
-    // state.dom = nextDom; // 상태에 갱신
   };
 }
