@@ -29,11 +29,11 @@ export function render(vnode, container) {
 
   // 함수형 컴포넌트인 경우 실행하여 vnode를 반환받고 다시 렌더링
   if (typeof vnode.type === 'function') {
+    const instanceKey = vnode.props.key != null ? vnode.props.key : vnode.type;
     const evaluatedVNode = renderFunctionComponent(vnode);
     const dom = createDom(evaluatedVNode);
-
-    // 컴포넌트 상태에 루트 DOM 저장
-    const state = getComponentState(vnode.type);
+    // 컴포넌트 상태에 최신 루트 DOM 저장
+    const state = getComponentState(instanceKey);
     if (state) state.dom = dom;
 
     container.appendChild(dom);
@@ -64,10 +64,11 @@ export function render(vnode, container) {
 function createDom(vnode) {
   // 함수형 컴포넌트면 먼저 실행해서 vnode를 얻고 다시 처리
   if (typeof vnode.type === 'function') {
+    const instanceKey = vnode.props.key != null ? vnode.props.key : vnode.type;
     const evaluatedVNode = renderFunctionComponent(vnode);
     const dom = createDom(evaluatedVNode);
     // 컴포넌트 상태에 최신 루트 DOM 저장
-    const state = getComponentState(vnode.type);
+    const state = getComponentState(instanceKey);
     if (state) state.dom = dom;
     return dom;
   }
@@ -141,8 +142,9 @@ function isRenderable(child) {
  * @returns {Object} 평가된 Virtual DOM 노드
  */
 function renderFunctionComponent(vnode) {
-  let state = getComponentState(vnode.type);
-  if (!state) state = initComponentInstance(vnode);
+  const instanceKey = vnode.props.key != null ? vnode.props.key : vnode.type;
+  let state = getComponentState(instanceKey);
+  if (!state) state = initComponentInstance(vnode, instanceKey);
   // props 동기화
   state.props = vnode.props;
   // 훅 컨텍스트 준비
@@ -164,9 +166,10 @@ function prepareHookContext(state) {
  * 컴포넌트 인스턴스의 상태를 초기화하고, 재렌더링 콜백을 생성합니다.
  *
  * @param {Object} vnode - 함수형 컴포넌트의 Virtual DOM 노드
+ * @param {*} instanceKey - 컴포넌트 인스턴스의 고유 키
  * @returns {Object} 초기화된 컴포넌트 상태 객체
  */
-function initComponentInstance(vnode) {
+function initComponentInstance(vnode, instanceKey) {
   const state = {
     componentType: vnode.type,
     props: vnode.props,
@@ -175,8 +178,9 @@ function initComponentInstance(vnode) {
     dom: null,
     rerender: null
   };
+  state.instanceKey = instanceKey;
   state.rerender = createRerenderCallback(state);
-  setComponentState(vnode.type, state);
+  setComponentState(instanceKey, state);
   return state;
 }
 
