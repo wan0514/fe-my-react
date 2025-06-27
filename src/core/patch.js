@@ -11,15 +11,18 @@ import { createDom } from './render';
  * @returns {Node} 패치된(혹은 교체된) DOM 노드
  */
 export function patch(dom, nextVNode) {
+  const oldVNode = dom.__vnode;
+  const prevProps = oldVNode.props;
+
   // 1) 타입이 다르면 완전 교체
-  if (dom.__vnode.type !== nextVNode.type) {
+  if (oldVNode.type !== nextVNode.type) {
     const newDom = createDom(nextVNode);
     dom.replaceWith(newDom);
     return newDom;
   }
 
   if (nextVNode.type === 'TEXT_ELEMENT') {
-    const prevText = dom.__vnode.props.nodeValue;
+    const prevText = oldVNode.props.nodeValue;
     const nextText = nextVNode.props.nodeValue;
     if (prevText !== nextText) {
       dom.nodeValue = nextText;
@@ -29,7 +32,6 @@ export function patch(dom, nextVNode) {
   }
 
   // 3) props diff & patch
-  const prevProps = dom.__vnode.props;
   const nextProps = nextVNode.props;
 
   // 3.1) 제거된 prop 처리
@@ -66,9 +68,9 @@ export function patch(dom, nextVNode) {
 
   // prev/next children VNode 배열에서 null/false 제거
   const prevChildren = (
-    Array.isArray(dom.__vnode.props.children)
-      ? dom.__vnode.props.children
-      : [dom.__vnode.props.children]
+    Array.isArray(prevProps.children)
+      ? prevProps.children
+      : [prevProps.children]
   ).filter((c) => c != null && c !== false);
 
   const nextChildren = (
@@ -79,6 +81,7 @@ export function patch(dom, nextVNode) {
 
   // 기존 DOM 노드들을 key 또는 인덱스를 키로 하는 맵으로 준비
   const existingMap = new Map();
+
   dom.childNodes.forEach((childDom, idx) => {
     const prevVNodeChild = prevChildren[idx];
     const key =
@@ -89,6 +92,8 @@ export function patch(dom, nextVNode) {
   });
 
   // nextChildren 순서로 패치 및 신규 엘리먼트 추가
+  const fragment = document.createDocumentFragment();
+
   nextChildren.forEach((childVNode, idx) => {
     const key = childVNode.props.key != null ? childVNode.props.key : idx;
     const matchedDom = existingMap.get(key);
@@ -97,9 +102,14 @@ export function patch(dom, nextVNode) {
       existingMap.delete(key);
     } else {
       const newDom = createDom(childVNode);
-      dom.appendChild(newDom);
+      fragment.appendChild(newDom);
     }
   });
+
+  // 배치 삽입 최적화: fragment에 모은 노드를 한 번에 붙임
+  if (fragment.hasChildNodes()) {
+    dom.appendChild(fragment);
+  }
 
   // 새 자식들에 포함되지 않은 기존 DOM은 모두 제거
   existingMap.forEach((childDom) => {
