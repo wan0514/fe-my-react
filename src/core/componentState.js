@@ -23,7 +23,10 @@ const finalizationRegistry = new FinalizationRegistry((primitiveKey) => {
  *   WeakMap의 키로 사용할 수 있는 객체 참조
  */
 function toWeakKey(instanceKey) {
-  if (typeof instanceKey === 'object' && instanceKey !== null) {
+  if (
+    (typeof instanceKey === 'object' || typeof instanceKey === 'function') &&
+    instanceKey !== null
+  ) {
     return instanceKey;
   }
   // 원시 키 처리 경로
