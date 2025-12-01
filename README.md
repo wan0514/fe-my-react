@@ -72,6 +72,8 @@ src/
 - 가상 DOM과 diff 로직이 모듈화되지 않아 확장·유지보수 어려움
 - SPA 라우터 기능 미구현
 
+👉 [ver1의 설계 회고 및 재설계 wiki](https://github.com/wan0514/fe-my-react/wiki/%5B%EB%AC%B8%EC%A0%9C%EC%99%80-%ED%95%B4%EA%B2%B0%5D-%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%EC%83%81%ED%83%9C-%EB%A7%B5%ED%95%91-%EC%84%A4%EA%B3%84-%ED%9A%8C%EA%B3%A0-%EB%B0%8F-%EC%9E%AC%EC%84%A4%EA%B3%84-%EB%B0%A9%ED%96%A5)
+
 ---
 
 ### ver2: VNode 기반 아키텍처로 리팩토링
